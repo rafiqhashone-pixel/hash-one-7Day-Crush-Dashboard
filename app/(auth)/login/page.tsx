@@ -1,3 +1,4 @@
+// 7DayCrush-Dashboard/app/(auth)/login/page.tsx
 "use client";
 
 import type React from "react";
@@ -15,14 +16,50 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  e.preventDefault();
+  setIsLoading(true);
 
-    setTimeout(() => {
-      setIsLoading(false);
+  try {
+    const res = await fetch(
+      "https://backend.7daycrush.com/api/v1/auth/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Login failed");
+      return;
+    }
+
+    // ✅ Save token
+    localStorage.setItem("access_token", data.access_token);
+
+    // Optional: role-based redirect
+    const payload = JSON.parse(
+      atob(data.access_token.split(".")[1])
+    );
+
+    if (payload.role === "admin") {
       router.push("/dashboard");
-    }, 1000);
-  };
+    } else {
+      router.push("/"); // or user dashboard
+    }
+  } catch (error) {
+    alert("Something went wrong. Please try again.");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen  flex items-center justify-center bg-gray-100 relative overflow-hidden px-4">

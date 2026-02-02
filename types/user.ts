@@ -1,0 +1,39 @@
+// types/user.ts
+export interface UserData {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  gender: string;
+  isVerified: boolean;
+  isProfileComplete: boolean;
+  isBlocked: boolean;
+  createdAt: string;
+  updatedAt: string;
+  dateOfBirth: string;
+  phoneNumber?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  postalCode?: string;
+  bio?: string;
+  relationshipGoal?: string;
+  jobTitle?: string;
+  workplace?: string;
+  education?: string;
+  alcohol?: string;
+  smoking?: string;
+  exercise?: string;
+  diet?: string;
+  interests?: string[];
+  galleryImages?: string[];
+  coverPhoto?: string;
+  personalityQuizQuestions?: Array<{ id: number; question: string }>;
+  deviceTokens?: string[];
+  authProvider?: string;
+  role?: string;
+  currentStep?: string;
+  ageRange?: number[];
+  distance?: string;
+  matchWith?: string;
+}
