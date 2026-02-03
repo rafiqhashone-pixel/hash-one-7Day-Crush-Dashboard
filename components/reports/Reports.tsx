@@ -13,7 +13,7 @@ const Reports = () => {
       <div className="max-w-full">
         {/* Header */}
         <header className="mb-6">
-          <h1 className=" text-3xl font-medium text-gray-700 mb-6">Reports</h1>
+
           <p className="text-gray-600 mt-2">View and manage your business reports</p>
         </header>
 

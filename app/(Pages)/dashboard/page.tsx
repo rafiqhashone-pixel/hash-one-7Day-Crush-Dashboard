@@ -10,7 +10,7 @@ import PeakUsageChart from "@/components/dashboard/PeakUsageChart";
 
 export default function DashboardPage() {
   return (
-    <div className="overflow-x-hidden p-6 mt-16 space-y-10">
+    <div className="overflow-x-hidden p-6 space-y-10">
       {/* Page Title */}
    <h1 className="text-3xl font-semibold bg-gradient-to-r from-red-800 to-black bg-clip-text text-transparent mb-2">
   Dashboard Overview

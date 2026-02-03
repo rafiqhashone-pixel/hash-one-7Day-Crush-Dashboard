@@ -12,54 +12,51 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsLoading(true);
+    e.preventDefault();
+    setIsLoading(true);
 
-  try {
-    const res = await fetch(
-      "https://backend.7daycrush.com/api/v1/auth/login",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    try {
+      const res = await fetch(
+        "https://backend.7daycrush.com/api/v1/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+          }),
         },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Login failed");
+        return;
       }
-    );
 
-    const data = await res.json();
+      // ✅ Save token
+      localStorage.setItem("access_token", data.access_token);
 
-    if (!res.ok) {
-      alert(data.message || "Login failed");
-      return;
+      // Optional: role-based redirect
+      const payload = JSON.parse(atob(data.access_token.split(".")[1]));
+
+      if (payload.role === "admin") {
+        router.push("/dashboard");
+      } else {
+        router.push("/"); // or user dashboard
+      }
+    } catch (error) {
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-
-    // ✅ Save token
-    localStorage.setItem("access_token", data.access_token);
-
-    // Optional: role-based redirect
-    const payload = JSON.parse(
-      atob(data.access_token.split(".")[1])
-    );
-
-    if (payload.role === "admin") {
-      router.push("/dashboard");
-    } else {
-      router.push("/"); // or user dashboard
-    }
-  } catch (error) {
-    alert("Something went wrong. Please try again.");
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   return (
     <div className="min-h-screen  flex items-center justify-center bg-gray-100 relative overflow-hidden px-4">
@@ -122,21 +119,7 @@ export default function LoginPage() {
   "
             />
 
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="remember"
-                checked={rememberMe}
-                onCheckedChange={(checked) => setRememberMe(checked === true)}
-                className="text-red-600 focus:ring-0"
-              />
-              <label
-                htmlFor="remember"
-                className="text-sm text-gray-600 cursor-pointer"
-              >
-                Remember Me
-              </label>
-            </div>
-
+            
             <Button
               type="submit"
               disabled={isLoading}

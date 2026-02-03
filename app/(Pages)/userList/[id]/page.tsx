@@ -19,6 +19,8 @@ import { ActionButtons } from "@/components/userDetail/RightSideSection/ActionBu
 import { LoadingState } from "@/components/userDetail/LoadingState";
 import { ErrorState } from "@/components/userDetail/ErrorState";
 import { UserData } from "@/types/user";
+import { MatchesTab } from "@/components/userDetail/TabContent/MatchesTab";
+import { ChatsTab } from "@/components/userDetail/TabContent/ChatsTab";
 
 export default function UserDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -26,7 +28,7 @@ export default function UserDetailPage() {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"overview" | "gallery" | "quiz" | "devices">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "gallery" | "quiz" | "devices" | "matches" | "chats">("overview");
   const [modalImage, setModalImage] = useState<string | null>(null);
 
   /* ---------------- FETCH USER ---------------- */
@@ -120,9 +122,41 @@ export default function UserDetailPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br mt-16 from-gray-50 to-gray-100 p-4 md:p-6">
+    <div className="min-h-screen bg-gradient-to-br  from-gray-50 to-gray-100 p-4 md:p-6">
       {/* Header */}
       <Header user={user} />
+
+      {/* IMAGE MODAL (for both profile and gallery images) */}
+      {modalImage && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-sm"
+          onClick={() => setModalImage(null)}
+        >
+          <div className="relative max-w-full max-h-full p-4" onClick={e => e.stopPropagation()}>
+            <button
+              className="absolute top-4 right-4 z-10 bg-black/70 hover:bg-black/90 text-white rounded-full p-3 transition"
+              onClick={() => setModalImage(null)}
+              aria-label="Close image modal"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="bg-white p-2 rounded-xl">
+              <img
+                src={modalImage}
+                alt="Full Image"
+                className="max-h-[80vh] max-w-[90vw] rounded-lg shadow-2xl"
+                onError={(e) => {
+                  console.error(`Failed to load modal image: ${modalImage}`);
+                  e.currentTarget.src = "https://placehold.co/800x600/3b82f6/ffffff?text=Image+Failed+to+Load";
+                }}
+              />
+            </div>
+            <p className="text-center text-white mt-4 text-sm">Click anywhere to close</p>
+          </div>
+        </div>
+      )}
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -156,6 +190,9 @@ export default function UserDetailPage() {
             )}
             {activeTab === 'quiz' && <PersonalityQuizTab user={user} />}
             {activeTab === 'devices' && <DevicesTab user={user} />}
+            {activeTab === 'matches' && <MatchesTab user={user} />} 
+            {activeTab === 'chats' && <ChatsTab user={user} />}
+            
           </div>
         </div>
 
@@ -184,7 +221,7 @@ export default function UserDetailPage() {
             user={user}
             onToggleBlock={toggleBlock}
             onDelete={deleteUser}
-            onEdit={editUser}
+           
           />
         </div>
       </div>

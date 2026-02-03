@@ -1,11 +1,11 @@
 // components/userDetail/TabsNavigation.tsx
 "use client";
 
-import { User, Image as ImageIcon, Hash, Globe } from "lucide-react";
+import { User, Image as ImageIcon, Backpack, Globe, Users, MessageSquare } from "lucide-react";
 
 interface TabsNavigationProps {
-  activeTab: "overview" | "gallery" | "quiz" | "devices";
-  setActiveTab: (tab: "overview" | "gallery" | "quiz" | "devices") => void;
+  activeTab: "overview" | "gallery" | "quiz" | "devices" | "matches" | "chats";
+  setActiveTab: (tab: "overview" | "gallery" | "quiz" | "devices" | "matches" | "chats") => void;
   galleryImagesCount: number;
   deviceTokensCount: number;
 }
@@ -34,7 +34,7 @@ export function TabsNavigation({
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-4">
-      <div className="flex space-x-1 border-b">
+      <div className="flex  border-b">
         <TabButton 
           active={activeTab === 'overview'} 
           onClick={() => setActiveTab('overview')}
@@ -55,7 +55,7 @@ export function TabsNavigation({
           active={activeTab === 'quiz'} 
           onClick={() => setActiveTab('quiz')}
         >
-          <Hash className="h-4 w-4 mr-2" />
+          <Backpack  className="h-4 w-4 mr-2" />
           Personality Quiz
         </TabButton>
         
@@ -64,7 +64,23 @@ export function TabsNavigation({
           onClick={() => setActiveTab('devices')}
         >
           <Globe className="h-4 w-4 mr-2" />
-          Devices ({deviceTokensCount})
+          Devices 
+        </TabButton>
+
+        <TabButton 
+          active={activeTab === 'matches'} 
+          onClick={() => setActiveTab('matches')}
+        >
+          <Users className="h-4 w-4 mr-2" />
+          Matches
+        </TabButton>
+
+        <TabButton 
+          active={activeTab === 'chats'} 
+          onClick={() => setActiveTab('chats')}
+        >
+          <MessageSquare  className="h-4 w-4 mr-2" />
+          Chats
         </TabButton>
       </div>
     </div>

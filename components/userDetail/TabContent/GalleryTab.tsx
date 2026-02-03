@@ -1,9 +1,12 @@
-// components/userDetail/TabContent/GalleryTab.tsx
 "use client";
 
-import { ImageIcon } from "lucide-react";
+import { useState } from "react";
+import { ImageIcon, Trash2 } from "lucide-react";
 import { UserData } from "@/types/user";
 import { getImageUrl } from "@/utils/imageUtils";
+import { apiFetch } from "@/lib/apiFetch";
+import { confirmDanger } from "@/lib/confirm";
+import { notify } from "@/lib/toast";
 
 interface GalleryTabProps {
   user: UserData;
@@ -12,79 +15,135 @@ interface GalleryTabProps {
   onCloseModal: () => void;
 }
 
-export function GalleryTab({ user, onImageClick, modalImage, onCloseModal }: GalleryTabProps) {
-  
+export function GalleryTab({ user, onImageClick }: GalleryTabProps) {
+  const [galleryImages, setGalleryImages] = useState<string[]>(
+    user.galleryImages || []
+  );
+  const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
+
+  const handleDeleteImage = async (
+    e: React.MouseEvent,
+    imageUrl: string,
+    index: number
+  ) => {
+    e.stopPropagation();
+    if (!user._id || deletingIndex !== null) return;
+
+    // 🔥 SweetAlert confirmation
+    const ok = await confirmDanger({
+      title: "Delete gallery image?",
+      text: "This image will be permanently removed.",
+      confirmText: "Yes, delete",
+    });
+
+    if (!ok) return;
+
+    try {
+      setDeletingIndex(index);
+
+      const res = await apiFetch(`/users/admin/${user._id}/gallery`, {
+        method: "DELETE",
+        body: JSON.stringify({
+          urls: [imageUrl],
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to delete gallery image");
+      }
+
+      // ✅ Update UI
+      setGalleryImages((prev) => prev.filter((_, i) => i !== index));
+
+      // ✅ Success toast
+      notify.success("Gallery image deleted");
+    } catch (err: any) {
+      console.error(err);
+      notify.error(err.message || "Failed to delete image");
+    } finally {
+      setDeletingIndex(null);
+    }
+  };
+
   return (
     <div>
-      <h3 className="text-lg font-semibold mb-4">Gallery Images ({user.galleryImages?.length || 0})</h3>
-      {user.galleryImages && user.galleryImages.length > 0 ? (
-        <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {user.galleryImages.map((img, index) => {
-              const imageUrl = getImageUrl(img);
-              return (
+      <h3 className="text-lg font-semibold mb-4">
+        Gallery Images ({galleryImages.length})
+      </h3>
+
+      {galleryImages.length > 0 ? (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {galleryImages.map((img, index) => {
+            const imageUrl = getImageUrl(img);
+
+            return (
+              <div
+                key={index}
+                className="group relative aspect-square rounded-xl overflow-visible shadow-md hover:shadow-xl transition-all duration-300 bg-white"
+              >
+                {/* IMAGE */}
                 <div
-                  key={index}
-                  className="group relative aspect-square rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer bg-white"
+                  className="w-full h-full cursor-pointer rounded-xl overflow-hidden"
                   onClick={() => onImageClick(imageUrl)}
                 >
                   <img
                     src={imageUrl}
                     alt={`Gallery Image ${index + 1}`}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    onError={(e) => {
-                      console.error(`Failed to load gallery image: ${imageUrl}`);
-                      e.currentTarget.src = `https://placehold.co/400x400/3b82f6/ffffff?text=Image+${index + 1}`;
-                      e.currentTarget.className = "w-full h-full object-cover bg-gray-100";
-                    }}
                     loading="lazy"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <p className="text-white text-sm font-medium">Image {index + 1}</p>
-                  </div>
-                  <div className="absolute inset-0 border-2 border-gray-100 rounded-xl pointer-events-none" />
-                </div>
-              );
-            })}
-          </div>
-          
-          {/* Image Modal */}
-          {modalImage && (
-            <div
-              className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-sm"
-              onClick={onCloseModal}
-            >
-              <div className="relative max-w-full max-h-full p-4" onClick={e => e.stopPropagation()}>
-                <button
-                  className="absolute top-4 right-4 z-10 bg-black/70 hover:bg-black/90 text-white rounded-full p-3 transition"
-                  onClick={onCloseModal}
-                  aria-label="Close image modal"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-                <div className="bg-white p-2 rounded-xl">
-                  <img
-                    src={modalImage}
-                    alt="Full Image"
-                    className="max-h-[80vh] max-w-[90vw] rounded-lg shadow-2xl"
                     onError={(e) => {
-                      console.error(`Failed to load modal image: ${modalImage}`);
-                      e.currentTarget.src = "https://placehold.co/800x600/3b82f6/ffffff?text=Image+Failed+to+Load";
+                      e.currentTarget.src =
+                        "https://placehold.co/400x400/3b82f6/ffffff?text=Image";
                     }}
                   />
                 </div>
-                <p className="text-center text-white mt-4 text-sm">Click anywhere to close</p>
+
+                {/* DELETE BUTTON */}
+                <div
+                  className="absolute bottom-1 right-1 z-10"
+                  onClick={(e) => handleDeleteImage(e, img, index)}
+                >
+                  <div
+                    className="h-9 w-9 bg-red-500 rounded-full flex items-center justify-center
+                    hover:bg-red-600 transition-all duration-200 shadow-lg border-2 border-white"
+                  >
+                    {deletingIndex === index ? (
+                      <svg
+                        className="animate-spin h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                        />
+                      </svg>
+                    ) : (
+                      <Trash2 className="h-4 w-4 text-white" />
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
-        </>
+            );
+          })}
+        </div>
       ) : (
         <div className="text-center py-12">
           <div className="inline-block p-6 bg-gray-50 rounded-2xl">
             <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">No gallery images available</p>
+            <p className="text-gray-500 text-lg">
+              No gallery images available
+            </p>
           </div>
         </div>
       )}

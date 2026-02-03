@@ -1,14 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import {
   ChevronLeft,
   PieChart,
   Package,
   History,
-  X,
-  Menu,
   LogOut,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
@@ -22,17 +19,19 @@ interface MenuItem {
 
 interface SidebarProps {
   className?: string;
-  isOpen?: boolean;
   isCollapsed: boolean;
   toggleSidebar: () => void;
+  isMobileOpen?: boolean;
+  onMobileClose?: () => void;
 }
 
 export default function Sidebar({
   isCollapsed,
   toggleSidebar,
   className = "",
+  isMobileOpen = false,
+  onMobileClose,
 }: SidebarProps) {
-  const [localIsOpen, setLocalIsOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -46,7 +45,7 @@ export default function Sidebar({
   ];
 
   const customerItems: MenuItem[] = [
-    { title: "User List", icon: "package", href: "/userList" },
+    { title: "Users List", icon: "package", href: "/userList" },
   ];
 
   const getIcon = (iconType: string) => {
@@ -67,17 +66,17 @@ export default function Sidebar({
 
     return (
       <li className="mb-1">
-       <Link
-  href={item.href}
-  onClick={() => setLocalIsOpen(false)} 
-  className={`flex items-center group transition-all duration-200 rounded-md
-    ${isCollapsed ? "flex-col justify-center py-3" : "flex-row px-3 py-2"}
-    ${
-      isActive
-        ? "bg-gradient-to-r from-red-900/40 to-red-600/40 text-white font-semibold"
-        : "text-gray-300 hover:bg-gray-700/50 hover:text-white"
-    }`}
->
+        <Link
+          href={item.href}
+          onClick={onMobileClose}
+          className={`flex items-center group transition-all duration-200 rounded-md
+            ${isCollapsed ? "flex-col justify-center py-3" : "flex-row px-3 py-2"}
+            ${
+              isActive
+                ? "bg-gradient-to-r from-red-900/40 to-red-600/40 text-white font-semibold"
+                : "text-gray-300 hover:bg-gray-700/50 hover:text-white"
+            }`}
+        >
           <span
             className={`transition-all duration-200 ${
               isActive ? "text-rose-400" : "text-gray-400 group-hover:text-rose-300"
@@ -117,44 +116,21 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Mobile Toggle Button */}
-      <button
-        onClick={() => setLocalIsOpen(!localIsOpen)}
-        className="sm:hidden fixed top-5 left-5 z-[2000] p-2 rounded-full bg-white/80 backdrop-blur-md shadow-lg hover:shadow-xl transition"
-      >
-        {localIsOpen ? (
-          <X className="w-6 h-6 text-red-600" />
-        ) : (
-          <Menu className="w-6 h-6 text-red-600" />
-        )}
-      </button>
-
-      {/* Overlay for Mobile */}
-      {localIsOpen && (
-        <div
-          className="sm:hidden fixed inset-0 bg-black/40 z-[1500]"
-          onClick={() => setLocalIsOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
+      {/* Sidebar Container */}
       <div
-
-  className={`fixed left-0 top-[6rem] bottom-0 text-white h-[calc(100vh-6rem)] flex flex-col relative 
-  overflow-hidden sm:overflow-visible
-  z-[1600] 
-  ${
-    localIsOpen
-      ? "w-64 translate-x-0"
-      : "w-0 -translate-x-full sm:translate-x-0"
-  }
-  ${isCollapsed ? "sm:w-24" : "sm:w-64"}
-  transition-all duration-300 ease-in-out
-  bg-gradient-to-b from-[#1f1f1f] to-[#2b2b2b]
-  border-r border-gray-800 shadow-lg
-  ${className}`}
->
-
+        className={`
+          fixed left-0 top-16 bottom-0 text-white h-[calc(100vh-4rem)] flex flex-col 
+          ${isMobileOpen ? "translate-x-0" : "-translate-x-full"} 
+          sm:translate-x-0
+          ${isCollapsed ? "sm:w-20" : "sm:w-64"}
+          w-64
+          transition-all duration-300 ease-in-out
+          bg-gradient-to-b from-[#1f1f1f] to-[#2b2b2b]
+          border-r border-gray-800 shadow-lg
+          z-40
+          ${className}
+        `}
+      >
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-2 py-4">
           <ul className="space-y-1">
@@ -163,7 +139,7 @@ export default function Sidebar({
             ))}
 
             <Divider />
-            <SectionHeader title="User" />
+            <SectionHeader title="Users" />
             {customerItems.map((item, index) => (
               <MenuItemComponent key={index} item={item} />
             ))}
@@ -174,11 +150,11 @@ export default function Sidebar({
         <button
           onClick={toggleSidebar}
           className="hidden sm:flex absolute -right-4 top-1/2 -translate-y-1/2 
-            w-10 h-10 bg-red-600 hover:bg-rose-500 rounded-full items-center 
-            justify-center shadow-md transition-all duration-300 hover:scale-105"
+            w-8 h-8 bg-red-600 hover:bg-rose-500 rounded-full items-center 
+            justify-center shadow-md transition-all duration-300 hover:scale-105 z-10"
         >
           <ChevronLeft
-            className={`w-5 h-5 text-white ${
+            className={`w-4 h-4 text-white ${
               isCollapsed ? "rotate-180" : ""
             } transition-transform duration-300`}
           />
