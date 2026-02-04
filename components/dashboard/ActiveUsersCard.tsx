@@ -2,16 +2,45 @@
 
 import { useEffect, useState } from "react";
 import { UserCheck } from "lucide-react";
+import { apiFetch } from "@/lib/apiFetch";
+
+interface User {
+  _id: string;
+  isBlocked: boolean;
+}
 
 export default function ActiveUsersCard() {
-  const [activeUsers, setActiveUsers] = useState(0);
+  const [activeUsersCount, setActiveUsersCount] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveUsers(Math.floor(Math.random() * 5) + 20);
-    }, 4000);
-    return () => clearInterval(interval);
+    fetchActiveUsers();
   }, []);
+
+  const fetchActiveUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await apiFetch("/users", {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch users`);
+      }
+
+      const users: User[] = await response.json();
+      
+      // Count users that are not blocked (active users)
+      const activeUsers = users.filter(user => !user.isBlocked);
+      setActiveUsersCount(activeUsers.length);
+
+    } catch (err) {
+      console.error("Error fetching active users:", err);
+      setActiveUsersCount(0); // Set to 0 on error
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="relative overflow-hidden rounded-full bg-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-500 hover:shadow-[0_8px_40px_rgb(0,0,0,0.07)] hover:-translate-y-0.5">
@@ -27,25 +56,18 @@ export default function ActiveUsersCard() {
             </div>
             <div>
               <p className="text-sm text-gray-500 font-medium">
-                Active Users Now
+                Active Users
               </p>
               <h3 className="text-4xl font-semibold text-gray-900 tracking-tight">
-                {activeUsers}
+                {loading ? (
+                  <div className="h-10 w-16 bg-gray-200 animate-pulse rounded"></div>
+                ) : (
+                  activeUsersCount.toLocaleString()
+                )}
               </h3>
             </div>
           </div>
-
-          {/* Live badge */}
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-            </span>
-            <span className="text-xs text-gray-400 font-medium">Live</span>
-          </div>
         </div>
-
-       
       </div>
     </div>
   );

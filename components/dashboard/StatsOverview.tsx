@@ -1,7 +1,32 @@
-import React from "react";
-import { User } from "lucide-react";
+"use client";
 
-function DashboardCard() {
+import React, { useEffect, useState } from "react";
+import { User } from "lucide-react";
+import { apiFetch } from "@/lib/apiFetch"; // your apiFetch helper
+
+export default function DashboardCard() {
+  const [totalUsers, setTotalUsers] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTotalUsers = async () => {
+      try {
+        const res = await apiFetch("/users"); // your endpoint
+        if (!res.ok) throw new Error("Failed to fetch users");
+
+        const data = await res.json();
+        setTotalUsers(data.length); // count of users
+      } catch (err: any) {
+        setError(err.message || "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTotalUsers();
+  }, []);
+
   return (
     <div className="flex flex-col mb-6">
       {/* Scrollable Area */}
@@ -13,7 +38,9 @@ function DashboardCard() {
               <div className="text-xs font-semibold text-purple-600 mb-1">
                 TOTAL USERS
               </div>
-              <div className="text-2xl font-bold text-gray-700">7</div>
+              <div className="text-2xl font-bold text-gray-700">
+                {loading ? "..." : error ? "Error" : totalUsers}
+              </div>
             </div>
             <User className="h-8 w-8 text-purple-600" />
           </div>
@@ -22,5 +49,3 @@ function DashboardCard() {
     </div>
   );
 }
-
-export default DashboardCard;

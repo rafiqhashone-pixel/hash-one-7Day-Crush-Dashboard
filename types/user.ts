@@ -29,7 +29,6 @@ export interface UserData {
   galleryImages?: string[];
   coverPhoto?: string;
   personalityQuizQuestions?: Array<{ id: number; question: string }>;
-  deviceTokens?: string[];
   authProvider?: string;
   role?: string;
   currentStep?: string;

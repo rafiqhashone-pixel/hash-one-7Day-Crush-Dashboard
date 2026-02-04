@@ -1,44 +1,80 @@
 "use client";
 
-import { useMemo } from "react";
-import { Users, UserCheck, UserX, UserMinus } from "lucide-react";
-import { usersData } from "@/app/data/usersData";
+import { useMemo, useEffect, useState } from "react";
+import { Users, UserCheck, UserX, UserCircle } from "lucide-react";
+import { apiFetch } from "@/lib/apiFetch";
+
+interface User {
+  _id: string;
+  isBlocked: boolean;
+  isProfileComplete: boolean;
+  isVerified: boolean;
+}
 
 export default function UserStatsCard() {
-  const stats = useMemo(() => {
-    const total = usersData.length;
-    const active = usersData.filter((u) => u.status === "active").length;
-    const inactive = usersData.filter((u) => u.status === "inactive").length;
-    const blocked = usersData.filter((u) => u.status === "blocked").length;
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-    return { total, active, inactive, blocked };
+  useEffect(() => {
+    fetchUsers();
   }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await apiFetch("/users", {
+        method: "GET",
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch users`);
+      }
+
+      const usersData: User[] = await response.json();
+      setUsers(usersData);
+
+    } catch (err) {
+      console.error("Error fetching users:", err);
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const stats = useMemo(() => {
+    const total = users.length;
+    const active = users.filter((u) => !u.isBlocked).length;
+    const blocked = users.filter((u) => u.isBlocked).length;
+    const verified = users.filter((u) => u.isVerified).length;
+
+    return { total, active, verified, blocked };
+  }, [users]);
 
   const statCards = [
     {
       title: "Total Users",
-      value: stats.total,
+      value: loading ? "..." : stats.total,
       icon: <Users className="h-6 w-6 text-indigo-500" />,
       color: "text-indigo-600",
       glow: "shadow-[0_0_12px_-4px_rgba(99,102,241,0.4)]",
     },
     {
       title: "Active Users",
-      value: stats.active,
+      value: loading ? "..." : stats.active,
       icon: <UserCheck className="h-6 w-6 text-emerald-500" />,
       color: "text-emerald-600",
       glow: "shadow-[0_0_12px_-4px_rgba(16,185,129,0.4)]",
     },
     {
-      title: "Inactive Users",
-      value: stats.inactive,
-      icon: <UserMinus className="h-6 w-6 text-amber-500" />,
-      color: "text-amber-600",
-      glow: "shadow-[0_0_12px_-4px_rgba(245,158,11,0.4)]",
+      title: "Verified Users",
+      value: loading ? "..." : stats.verified,
+      icon: <UserCircle className="h-6 w-6 text-blue-500" />,
+      color: "text-blue-600",
+      glow: "shadow-[0_0_12px_-4px_rgba(59,130,246,0.4)]",
     },
     {
       title: "Blocked Users",
-      value: stats.blocked,
+      value: loading ? "..." : stats.blocked,
       icon: <UserX className="h-6 w-6 text-rose-500" />,
       color: "text-rose-600",
       glow: "shadow-[0_0_12px_-4px_rgba(244,63,94,0.4)]",
@@ -66,7 +102,11 @@ export default function UserStatsCard() {
 
           {/* Value */}
           <h3 className="mt-3 text-2xl font-semibold text-gray-800 tracking-tight group-hover:text-gray-900">
-            {stat.value}
+            {loading ? (
+              <div className="h-8 w-12 bg-gray-200 animate-pulse rounded"></div>
+            ) : (
+              stat.value
+            )}
           </h3>
         </div>
       ))}

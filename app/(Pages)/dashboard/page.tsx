@@ -17,8 +17,7 @@ export default function DashboardPage() {
 </h1>
 
 
-      {/* Row 1 — High-level system stats */}
-
+    
       {/* Row 2 — User breakdown + Active users side-by-side */}
             <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 space-y-6">
@@ -29,8 +28,6 @@ export default function DashboardPage() {
         </div>
       </section>
           <UserStatsCard />
-
-
       {/* Row 3 — Matches and growth charts side-by-side */}
       <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
         <MatchStatsCard />

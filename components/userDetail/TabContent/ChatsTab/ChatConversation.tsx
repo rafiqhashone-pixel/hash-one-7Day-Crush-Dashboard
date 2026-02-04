@@ -15,7 +15,7 @@ interface ChatUser {
   firstName: string;
   lastName: string;
   coverPhoto: string;
-  isOnline: boolean;
+  
 }
 
 interface Message {
@@ -113,20 +113,14 @@ export function ChatConversation({
               )}
             </div>
 
-            {chat.otherUser.isOnline && (
-              <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1 shadow-sm border-2 border-white">
-                <div className="h-2 w-2"></div>
-              </div>
-            )}
+            
           </div>
 
           <div>
             <h3 className="font-semibold text-gray-900">
               {chat.otherUser.firstName} {chat.otherUser.lastName}
             </h3>
-            <p className="text-xs text-gray-500">
-              {chat.otherUser.isOnline ? "Online" : "Offline"}
-            </p>
+            
           </div>
         </div>
 

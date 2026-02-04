@@ -10,7 +10,6 @@ import { TabsNavigation } from "@/components/userDetail/TabsNavigation";
 import { OverviewTab } from "@/components/userDetail/TabContent/OverviewTab";
 import { GalleryTab } from "@/components/userDetail/TabContent/GalleryTab";
 import { PersonalityQuizTab } from "@/components/userDetail/TabContent/PersonalityQuizTab";
-import { DevicesTab } from "@/components/userDetail/TabContent/DevicesTab";
 import { QuickStats } from "@/components/userDetail/RightSideSection/QuickStats";
 import { ContactInfo } from "@/components/userDetail/RightSideSection/ContactInfo";
 import { Interests } from "@/components/userDetail/RightSideSection/Interests";
@@ -28,7 +27,7 @@ export default function UserDetailPage() {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"overview" | "gallery" | "quiz" | "devices" | "matches" | "chats">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "gallery" | "quiz"  | "matches" | "chats">("overview");
   const [modalImage, setModalImage] = useState<string | null>(null);
 
   /* ---------------- FETCH USER ---------------- */
@@ -159,7 +158,7 @@ export default function UserDetailPage() {
       )}
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Left Column - User Profile */}
         <div className="lg:col-span-2 space-y-6">
           {/* Profile Card */}
@@ -174,7 +173,7 @@ export default function UserDetailPage() {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             galleryImagesCount={user.galleryImages?.length || 0}
-            deviceTokensCount={user.deviceTokens?.length || 0}
+           
           />
 
           {/* Tab Content */}
@@ -189,7 +188,7 @@ export default function UserDetailPage() {
               />
             )}
             {activeTab === 'quiz' && <PersonalityQuizTab user={user} />}
-            {activeTab === 'devices' && <DevicesTab user={user} />}
+            
             {activeTab === 'matches' && <MatchesTab user={user} />} 
             {activeTab === 'chats' && <ChatsTab user={user} />}
             
